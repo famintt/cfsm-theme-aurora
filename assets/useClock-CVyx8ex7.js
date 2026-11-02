@@ -1,1 +1,0 @@
-import{U as a,V as o,S as r}from"./index-80V79Puc.js";function u(t=1e3){const e=r(new Date);let n=null;return a(()=>{e.value=new Date,n=setInterval(()=>{e.value=new Date},t)}),o(()=>{clearInterval(n)}),e}export{u};
