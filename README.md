@@ -10,8 +10,9 @@
   <img alt="verified" src="https://img.shields.io/badge/verified-2.8.7%20Beta6-9A6BFF">
 </p>
 
-<!-- 建议：把一张首页截图放到 docs/preview.png，然后取消下一行注释，README 会好看很多 -->
-<!-- ![Aurora 预览](docs/preview.png) -->
+![Aurora 预览](docs/preview.png)
+
+> 封面为设计示意图，实际界面以运行效果为准。
 
 **一句话安装**：后台 → 设置 → 「第三方主题地址」填
 `https://github.com/famintt/cfsm-theme-aurora/tree/main` → 保存 → 打开首页。
