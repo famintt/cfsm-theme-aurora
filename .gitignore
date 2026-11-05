@@ -1,0 +1,14 @@
+# 依赖与构建缓存（源码在 source/，产物提交到根目录）
+source/node_modules/
+source/dist/
+source/.vite/
+
+# 本地环境变量
+.env
+.env.local
+source/.env
+source/.env.local
+
+# 系统
+.DS_Store
+Thumbs.db

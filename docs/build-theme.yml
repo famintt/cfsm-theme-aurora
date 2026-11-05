@@ -1,0 +1,59 @@
+name: Build theme
+
+# 手动触发：从 source/ 构建，把产物写回根目录（index.html + assets/）
+# 触发后 1～2 分钟完成；不需要配置任何 secret，API_BASE 等变量缺省即按同源部署构建。
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-theme
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+
+      - name: Install dependencies
+        working-directory: source
+        run: npm ci
+
+      - name: Build
+        working-directory: source
+        env:
+          API_BASE: ${{ vars.API_BASE }}
+          TITLE: ${{ vars.TITLE }}
+          BACKGROUND_IMAGE: ${{ vars.BACKGROUND_IMAGE }}
+        run: npm run build
+
+      - name: Publish to repository root
+        run: |
+          set -euo pipefail
+          test -f source/dist/index.html || { echo "::error::source/dist/index.html 不存在，构建可能失败"; exit 1; }
+          rm -rf assets
+          cp -R source/dist/assets ./assets
+          cp source/dist/index.html ./index.html
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A assets index.html
+
+          if git diff --cached --quiet; then
+            echo "产物无变化，跳过提交。"
+            exit 0
+          fi
+
+          git commit -m "build: 从 source/ 重新构建主题产物"
+          git push

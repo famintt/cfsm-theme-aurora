@@ -1,7 +1,8 @@
 # Aurora · CF-Server-Monitor 主题
 
 > 一套自带极光氛围的 [CF-Server-Monitor](https://github.com/huilang-me/CF-Server-Monitor) 第三方主题。
-> 本仓库只存放**构建产物**（`index.html` + `assets/`），面板会直接反代加载，**不需要你自己构建、也不需要改 Worker 代码**。
+> 仓库根目录放的是**构建产物**（`index.html` + `assets/`），面板直接反代加载，**不需要你自己构建、也不需要改 Worker 代码**；
+> 源码在 [`source/`](source/)（Vue 3 + Vite），想改配色或加功能看 [源码与构建](#源码与构建)。
 
 <p align="left">
   <img alt="for" src="https://img.shields.io/badge/for-CF--Server--Monitor-6E8BFF">
@@ -37,7 +38,7 @@
 - [缓存、更新与「改了没生效」](#缓存更新与改了没生效)
 - [常见问题 FAQ](#常见问题-faq)
 - [兼容性](#兼容性)
-- [自己改这个主题](#自己改这个主题)
+- [源码与构建](#源码与构建)
 - [致谢](#致谢)
 
 ---
@@ -84,7 +85,9 @@ Aurora 就是那个「可被替换的前台」。启用后：
 - 中文 / 英文界面（跟随后台语言设置）；
 - 深色 / 浅色切换（右上角按钮）；
 - 页脚：站点名 + `v版本号` + 最后更新时间 + `Powered by CF-Server-Monitor` 链接；
-- 桌面与移动端自适应；加载中显示骨架屏，加载失败提供重试按钮。
+- 桌面与移动端自适应；加载中显示骨架屏，加载失败提供重试按钮；
+- 站点开启 **Cloudflare Turnstile** 时先过一道人机验证，通过后才拉数据；
+- 实时连接被面板判定为长时间挂起时弹提示，可「继续」保持长连或关闭。
 
 > 主题**不需要任何额外配置**：配色、语言、显示哪些指标都由后台决定，右上角可手动切明暗。
 
@@ -92,22 +95,32 @@ Aurora 就是那个「可被替换的前台」。启用后：
 
 ```
 .
-├── index.html                      # 主题入口（面板反代的就是它）
-└── assets/
-    ├── index-BmSr5STf.js           # 主包（~144 KB，含路由、API、i18n）
-    ├── index-Ao4iBXY8.css          # 主样式
-    ├── Dashboard-Bxj1-1Q7.js       # 首页分块
-    ├── Dashboard-Bp3_nNDZ.css
-    ├── ServerDetail-CyGvOkY7.js    # 详情页分块
-    ├── ServerDetail-es1xsQdL.css
-    ├── Epaper-Ce7XbOzt.js          # 墨水屏视图分块
-    ├── Epaper-DQ87YXFa.css
-    ├── FooterBar-CedzpDLx.js       # 头部 + 页脚分块
-    └── FooterBar-0lIvkQqs.css
+├── index.html                          # 构建产物 · 主题入口（面板反代的就是它）
+├── assets/                             # 构建产物 · 前端资源（面板反代 /assets/*）
+│   ├── index-BmSr5STf.js               # 主包（~144 KB，含路由、API、i18n）
+│   ├── index-Ao4iBXY8.css              # 主样式
+│   ├── Dashboard-Bxj1-1Q7.js           # 首页分块
+│   ├── Dashboard-Bp3_nNDZ.css
+│   ├── ServerDetail-CyGvOkY7.js        # 详情页分块
+│   ├── ServerDetail-es1xsQdL.css
+│   ├── Epaper-Ce7XbOzt.js              # 墨水屏视图分块
+│   ├── Epaper-DQ87YXFa.css
+│   ├── FooterBar-CedzpDLx.js           # 头部 + 页脚分块
+│   └── FooterBar-0lIvkQqs.css
+├── source/                             # 源码（Vue 3 + Vite，见「源码与构建」）
+│   ├── src/
+│   ├── index.html                      # 开发模板
+│   ├── package.json
+│   ├── package-lock.json
+│   └── vite.config.js
+└── docs/                               # 封面图 + 可选的 Actions 模板
+    ├── preview.png
+    ├── preview.svg
+    └── build-theme.yml                 # 复制到 .github/workflows/ 即可手动触发构建
 ```
 
-**只会用到 `index.html` 与 `assets/` 目录这两样东西。**
-文件名中的哈希是构建指纹，升级时会变，属于正常现象 —— **不要手动重命名**，否则页面会白屏。
+**主题加载只会用到根目录的 `index.html` 与 `assets/`。** 这两处是构建产物，不要手改；
+要改就改 `source/` 再重新构建。文件名里的哈希是构建指纹，升级时会变，属于正常现象 —— **不要手动重命名**，否则页面会白屏。
 
 ## 准备工作
 
@@ -393,31 +406,104 @@ Aurora 目前**不在商店里**，请按本文手动填写地址接入。
 
 - 已在 **CF-Server-Monitor `2.8.7 Beta6`** 验证；
 - 依赖接口：`/api/config`、`/api/servers`、`/api/server`、`/api/history/all`，以及 WebSocket 实时推送；
-- 不依赖已废弃的 `config.json`；API 地址默认取同源，若后台设置了 `API_BASE`，
-  面板会注入 `<meta name="api-base">` 覆盖；
+- 不依赖已废弃的 `config.json`；API 地址默认取**同源**。只有跨域部署时才需要在构建时传 `API_BASE`，
+  `vite.config.js` 会把它写进 `<meta name="apiBase">`（驼峰，注意大小写），主题据此指向别的 Worker；
 - 内置主题专属的「显示模式」（`bar` / `ring` / `table`）与「深浅色」是**内置主题**的全局设置，
-  第三方主题可以读取也可以忽略 —— Aurora 只使用深浅色。
+  第三方主题可以读取也可以忽略 —— Aurora 只使用深浅色；
+- 站点开启 Turnstile 时，主题会从 `challenges.cloudflare.com` 加载验证脚本；
+  若你在面板里自定义过 CSP（`csp_static`），记得放行该域名。
 
-## 自己改这个主题
+## 源码与构建
 
-> 本仓库是**构建产物**，不含源码。要改，走这条路：
+源码在 [`source/`](source/)：**Vue 3 + Vite**，没有 TypeScript，也没有额外的状态管理库（数据层就是一个 `reactive` 的 `monitor` 对象）。
+`npm run build` 输出到 `source/dist`，把产物覆盖到仓库根目录即完成发布。
 
-1. **Fork** 本仓库；
-2. 用任意前端框架（Vue / React 均可）+ **hash 路由**产出 `index.html` + `assets/`；
-3. 满足面板的约定：
-   - 首页路由 `/#/`，详情页 `/#/server/:id`；
-   - `index.html` 里用**相对路径**引用资源：`assets/xxx.js`（面板会改写成 `/assets/xxx.js`）；
-   - **不要**实现后台页面，后台入口直接链到 `/admin#/admin`；
-   - 保留页脚 **Powered by CF-Server-Monitor** 并链接到
-     <https://github.com/huilang-me/CF-Server-Monitor>；
-   - 国旗 / 系统图标请使用面板提供的 `/flags/<code>.svg` 与 `/os-icons/`，不要打包进 `assets/`；
-   - 站点标题、背景、favicon、custom head 交给后台，别写死；
-4. 把构建产物提交到 fork 的某个分支（或直接在 `main`）；
-5. 后台填 `https://github.com/<你>/<fork>/tree/<分支>`。
+### 目录速览
 
-更细的契约见官方文档：
+| 路径 | 作用 |
+| --- | --- |
+| `source/src/views/` | 三个页面：`Dashboard.vue`、`ServerDetail.vue`、`Epaper.vue` |
+| `source/src/components/` | `ServerCard`、`SummaryHero`、`LineChart`、`MetricRing`、`AppHeader`、`FooterBar` 等 |
+| `source/src/stores/monitor.js` | 数据层：拉 `/api/*`、建 WebSocket、断线重连、`localStorage` 持久化 |
+| `source/src/utils/` | `config.js`（API 地址与存储键）、`format.js`（单位换算）、`i18n.js`（中英词条）、`ws.js` |
+| `source/src/styles/main.css` | 配色、圆角、密度等 CSS 变量与全局样式 |
+
+### 本地开发
+
+```bash
+cd source
+npm install
+npm run dev        # http://localhost:5173
+```
+
+开发服务器会把 `/api`、`/flags`、`/os-icons` 代理到 `http://127.0.0.1:8787`（`wrangler dev` 的默认端口），
+本地把面板跑起来就能联调真实数据。要指向别的地址：
+
+```bash
+VITE_DEV_PROXY_TARGET=http://127.0.0.1:8787 npm run dev
+```
+
+### 构建并发布到根目录
+
+```bash
+cd source
+npm run build
+rm -rf ../assets && cp -R dist/assets ../assets && cp dist/index.html ../index.html
+```
+
+Windows PowerShell：
+
+```powershell
+cd source
+npm run build
+Remove-Item ..\assets -Recurse -Force
+Copy-Item dist\assets ..\assets -Recurse
+Copy-Item dist\index.html ..\index.html -Force
+```
+
+提交推送后即生效，面板按分支缓存 1 小时（见 [缓存、更新与「改了没生效」](#缓存更新与改了没生效)）。
+
+不想本地装 Node 也行：`docs/build-theme.yml` 是一个现成的 Actions 模板（**手动触发**，从 `source/`
+构建后把产物提交回根目录）。把它复制到仓库的 `.github/workflows/` 下，就能在 Actions 页面点 **Run workflow** 使用。
+
+### 构建期变量
+
+写进 `source/.env`，或用 `API_BASE=... npm run build` 临时传入：
+
+| 变量 | 作用 |
+| --- | --- |
+| `API_BASE` | 写进 `<meta name="apiBase">`，用于**跨域**把前台指向别的 Worker，多个用逗号分隔；同源部署留空 |
+| `TITLE` | 覆盖 `index.html` 的 `<title>`（后台仍会按站点设置再覆盖一次） |
+| `BACKGROUND_IMAGE` | 生成 `--user-background-image`，仅本地调试用 |
+
+### 常见改动位置
+
+- **配色**：`source/src/styles/main.css` 顶部的 `--accent` / `--bg` / `--surface` 变量；
+- **卡片列数**：`Dashboard.vue` 里 `.server-grid` 的 `grid-template-columns`（默认 4 列）；
+- **文案**：`source/src/utils/i18n.js`，中英两份；
+- **首页四块汇总**：`components/SummaryHero.vue`；
+- **详情页图表**：`components/LineChart.vue` 与 `views/ServerDetail.vue`。
+
+> 源码里的 `components/ThemeMenu.vue`（配色 / 密度 / 迷你图开关）和 `components/ServerTable.vue`（列表视图）
+> **目前没有挂载**，属于半成品；它们依赖的 `/api/theme_options` 读写已经在 `stores/monitor.js` 里实现，接上就能用。
+
+### 从零写一个主题
+
+<details>
+<summary>面板对第三方主题的硬性约定</summary>
+
+- 首页路由 `/#/`，详情页 `/#/server/:id`；
+- `index.html` 用**相对路径**引用资源（`assets/xxx.js`），面板会改写成 `/assets/xxx.js`；
+- **不要**实现后台页面，后台入口直接链到 `/admin#/admin`；
+- 保留页脚 **Powered by CF-Server-Monitor** 并链接到 <https://github.com/huilang-me/CF-Server-Monitor>；
+- 国旗 / 系统图标用面板提供的 `/flags/<code>.svg` 与 `/os-icons/`，不要打包进 `assets/`；
+- 站点标题、背景、favicon、custom head 交给后台，别写死。
+
+官方契约：
 [theme-develop.md](https://github.com/huilang-me/CF-Server-Monitor/blob/main/theme-develop.md) ·
 [theme-ai-prompt.md](https://github.com/huilang-me/CF-Server-Monitor/blob/main/theme-ai-prompt.md)
+
+</details>
 
 ## 致谢
 
