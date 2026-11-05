@@ -428,7 +428,7 @@ function pctText(value, fallback = '—') {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--text);
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--accent-2)));
   transition: width 0.5s ease;
 }
 

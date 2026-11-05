@@ -5,6 +5,7 @@ import { monitor, toggleTheme } from '../stores/monitor'
 import { adminUrl } from '../utils/config'
 import { t } from '../utils/i18n'
 import AppIcon from './AppIcon.vue'
+import ThemeMenu from './ThemeMenu.vue'
 
 const adminHref = adminUrl()
 
@@ -28,6 +29,8 @@ const adminLabel = computed(() => (authed.value ? t('adminPanel') : t('login')))
           <AppIcon name="admin" :size="16" />
           <span class="link-label">{{ adminLabel }}</span>
         </a>
+
+        <ThemeMenu />
 
         <button
           class="theme-toggle"

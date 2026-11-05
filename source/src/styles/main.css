@@ -66,6 +66,90 @@ html[data-theme="dark"] {
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
+/* Accent palettes -------------------------------------------------------
+   monitor.accent is written to <html data-accent>; these blocks remap the
+   accent tokens so charts, meters, selection and the ambient background all
+   follow the picker in the appearance menu. Light values are darkened so
+   accent text keeps contrast on white. */
+html[data-accent="aurora"] {
+  --accent: #0b9fc4;
+  --accent-2: #7c6cf0;
+  --accent-rgb: 11, 159, 196;
+  --accent-2-rgb: 124, 108, 240;
+}
+
+html[data-accent="emerald"] {
+  --accent: #059669;
+  --accent-2: #0891b2;
+  --accent-rgb: 5, 150, 105;
+  --accent-2-rgb: 8, 145, 178;
+}
+
+html[data-accent="sakura"] {
+  --accent: #e11d48;
+  --accent-2: #c026d3;
+  --accent-rgb: 225, 29, 72;
+  --accent-2-rgb: 192, 38, 211;
+}
+
+html[data-accent="amber"] {
+  --accent: #d97706;
+  --accent-2: #ea580c;
+  --accent-rgb: 217, 119, 6;
+  --accent-2-rgb: 234, 88, 12;
+}
+
+html[data-theme="dark"][data-accent="aurora"] {
+  --accent: #4dd7ff;
+  --accent-2: #8b7cff;
+  --accent-rgb: 77, 215, 255;
+  --accent-2-rgb: 139, 124, 255;
+}
+
+html[data-theme="dark"][data-accent="emerald"] {
+  --accent: #34d399;
+  --accent-2: #22d3ee;
+  --accent-rgb: 52, 211, 153;
+  --accent-2-rgb: 34, 211, 238;
+}
+
+html[data-theme="dark"][data-accent="sakura"] {
+  --accent: #fb7185;
+  --accent-2: #e879f9;
+  --accent-rgb: 251, 113, 133;
+  --accent-2-rgb: 232, 121, 249;
+}
+
+html[data-theme="dark"][data-accent="amber"] {
+  --accent: #fbbf24;
+  --accent-2: #fb923c;
+  --accent-rgb: 251, 191, 36;
+  --accent-2-rgb: 251, 146, 60;
+}
+
+/* Density --------------------------------------------------------------
+   Compact tightens the page rhythm without touching the type scale. */
+html[data-density="compact"] {
+  --gap: 8px;
+  --radius: 12px;
+  --header-h: 53px;
+}
+
+html[data-density="compact"] .node-card,
+html[data-density="compact"] .summary-tile {
+  padding: 12px;
+}
+
+html[data-density="compact"] .summary-tile {
+  min-height: 96px;
+}
+
+html[data-density="compact"] .table-shell th,
+html[data-density="compact"] .table-shell td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
 *,
 *::before,
 *::after {

@@ -22,6 +22,37 @@ import { isServerOnline, normalizeTimestamp, serverRamPercent, serverDiskPercent
 const ACCENTS = ['aurora', 'emerald', 'sakura', 'amber']
 const DENSITIES = ['comfortable', 'compact']
 const THEME_MODES = ['auto', 'dark', 'light']
+const VIEWS = ['grid', 'list']
+const UI_PREF_KEY = 'cfsm-theme-ui'
+
+// Per-browser appearance preferences. They are mirrored into
+// `theme_options` when an admin is signed in, but a visitor without a
+// token still keeps their choices across reloads.
+function readUiPrefs() {
+  try {
+    const raw = localStorage.getItem(UI_PREF_KEY)
+    const parsed = raw ? JSON.parse(raw) : null
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+function writeUiPrefs() {
+  try {
+    localStorage.setItem(
+      UI_PREF_KEY,
+      JSON.stringify({
+        accent: monitor.accent,
+        density: monitor.density,
+        sparkline: monitor.sparkline,
+        view: monitor.view
+      })
+    )
+  } catch {
+    /* storage unavailable */
+  }
+}
 
 export const DEFAULT_SYS_CONFIG = Object.freeze({
   show_price: true,
@@ -69,7 +100,8 @@ export const monitor = reactive({
   theme: 'light',
   accent: 'aurora',
   density: 'comfortable',
-  sparkline: true
+  sparkline: true,
+  view: 'grid'
 })
 
 let configPromise = null
@@ -200,9 +232,22 @@ function applyConfig(config) {
   }
 
   const options = config.theme_options && typeof config.theme_options === 'object' ? config.theme_options : {}
-  if (ACCENTS.includes(options.accent)) monitor.accent = options.accent
-  if (DENSITIES.includes(options.density)) monitor.density = options.density
-  if (typeof options.sparkline === 'boolean') monitor.sparkline = options.sparkline
+  const local = readUiPrefs()
+
+  // Local choices win, so an admin saving a default for everyone does not
+  // overwrite what this browser already picked; the server value is the
+  // fallback for a first visit.
+  if (ACCENTS.includes(local.accent)) monitor.accent = local.accent
+  else if (ACCENTS.includes(options.accent)) monitor.accent = options.accent
+
+  if (DENSITIES.includes(local.density)) monitor.density = local.density
+  else if (DENSITIES.includes(options.density)) monitor.density = options.density
+
+  if (typeof local.sparkline === 'boolean') monitor.sparkline = local.sparkline
+  else if (typeof options.sparkline === 'boolean') monitor.sparkline = options.sparkline
+
+  if (VIEWS.includes(local.view)) monitor.view = local.view
+  else if (VIEWS.includes(options.view)) monitor.view = options.view
 
   let storedTheme = ''
   try {
@@ -239,7 +284,8 @@ async function saveThemeOptions() {
       ...(monitor.config.theme_options || {}),
       accent: monitor.accent,
       density: monitor.density,
-      sparkline: monitor.sparkline
+      sparkline: monitor.sparkline,
+      view: monitor.view
     }
     const data = await postJson(base, '/api/theme_options', { theme_options: payload }, { auth: true, turnstile: true })
     if (data?.theme_options && typeof data.theme_options === 'object') {
@@ -272,6 +318,7 @@ export function setAccent(accent) {
   if (!ACCENTS.includes(accent)) return
   monitor.accent = accent
   applyAppearance()
+  writeUiPrefs()
   scheduleThemeSave()
 }
 
@@ -279,12 +326,21 @@ export function setDensity(density) {
   if (!DENSITIES.includes(density)) return
   monitor.density = density
   applyAppearance()
+  writeUiPrefs()
   scheduleThemeSave()
 }
 
 export function setSparkline(enabled) {
   monitor.sparkline = Boolean(enabled)
   applyAppearance()
+  writeUiPrefs()
+  scheduleThemeSave()
+}
+
+export function setView(view) {
+  if (!VIEWS.includes(view)) return
+  monitor.view = view
+  writeUiPrefs()
   scheduleThemeSave()
 }
 

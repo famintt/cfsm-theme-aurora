@@ -80,6 +80,29 @@ Aurora 就是那个「可被替换的前台」。启用后：
 - 网络行：实时 `↓ / ↑` 速率 + 累计 `↓ / ↑` 流量；
 - 三网延迟行：电信 / 联通 / 移动（名称可在后台自定义），后台开启「显示三网延迟」时才展示。
 
+**外观菜单（右上角调色板图标）**
+
+| 选项 | 取值 | 作用 |
+| --- | --- | --- |
+| 外观 | 深色 / 浅色 / 跟随系统 | 跟随后台默认值；「跟随系统」随操作系统的浅色 / 深色自动切换 |
+| 主题色 | 极光 / 翡翠 / 樱花 / 琥珀 | 进度条、图表、选中态与背景光晕的主色 |
+| 密度 | 舒适 / 紧凑 | 紧凑模式收紧间距与卡片内边距，一屏多放一行节点 |
+| 迷你走势 | 开 / 关 | 控制「实时速度」块里的 1 分钟走势小图 |
+| 语言 | 中文 / EN | 只影响当前浏览器，不改后台设置 |
+
+改动立即生效，并记在浏览器本地（`localStorage` 的 `cfsm-theme-ui`）。
+管理员登录后改动还会写进面板的 `theme_options`，作为**其他访客的默认值** —— 访客自己的选择优先级更高。
+
+**视图切换**
+
+首页节点区右上角有「卡片视图 / 列表视图」两个按钮。列表视图是一张表格：名称、状态、CPU、内存、硬盘、本月流量、网络、延迟、到期，点击行即进入详情页。选择同样会被记住。
+
+![首页 · 卡片视图](docs/screenshot-dashboard.png)
+
+![首页 · 深色外观](docs/screenshot-dark.png)
+
+![首页 · 列表视图](docs/screenshot-list.png)
+
 **全局**
 
 - 中文 / 英文界面（跟随后台语言设置）；
@@ -89,7 +112,7 @@ Aurora 就是那个「可被替换的前台」。启用后：
 - 站点开启 **Cloudflare Turnstile** 时先过一道人机验证，通过后才拉数据；
 - 实时连接被面板判定为长时间挂起时弹提示，可「继续」保持长连或关闭。
 
-> 主题**不需要任何额外配置**：配色、语言、显示哪些指标都由后台决定，右上角可手动切明暗。
+> 主题开箱即用：显示哪些指标由后台决定；配色、密度、迷你走势、语言是每位访客在右上角外观菜单里自选的偏好，不需要运维介入。
 
 ## 仓库结构
 
@@ -97,25 +120,28 @@ Aurora 就是那个「可被替换的前台」。启用后：
 .
 ├── index.html                          # 构建产物 · 主题入口（面板反代的就是它）
 ├── assets/                             # 构建产物 · 前端资源（面板反代 /assets/*）
-│   ├── index-BmSr5STf.js               # 主包（~144 KB，含路由、API、i18n）
-│   ├── index-Ao4iBXY8.css              # 主样式
-│   ├── Dashboard-Bxj1-1Q7.js           # 首页分块
-│   ├── Dashboard-Bp3_nNDZ.css
-│   ├── ServerDetail-CyGvOkY7.js        # 详情页分块
+│   ├── index-DwrCMCdN.js               # 主包（~149 KB，含路由、API、i18n、外观状态）
+│   ├── index-LZee5jp-.css              # 主样式（含 4 套主题色与密度变量）
+│   ├── Dashboard-Mgrg1Tz8.js           # 首页分块
+│   ├── Dashboard-CQLUiOOp.css
+│   ├── ServerDetail-DW6PQ4d3.js        # 详情页分块
 │   ├── ServerDetail-es1xsQdL.css
-│   ├── Epaper-Ce7XbOzt.js              # 墨水屏视图分块
+│   ├── Epaper-CLUtUQnY.js              # 墨水屏视图分块
 │   ├── Epaper-DQ87YXFa.css
-│   ├── FooterBar-CedzpDLx.js           # 头部 + 页脚分块
-│   └── FooterBar-0lIvkQqs.css
+│   ├── FooterBar-Ua2ZOhQi.js           # 头部（含外观菜单）+ 页脚分块
+│   └── FooterBar-BtZWTPP0.css
 ├── source/                             # 源码（Vue 3 + Vite，见「源码与构建」）
 │   ├── src/
 │   ├── index.html                      # 开发模板
 │   ├── package.json
 │   ├── package-lock.json
 │   └── vite.config.js
-└── docs/                               # 封面图 + 可选的 Actions 模板
-    ├── preview.png
-    ├── preview.svg
+└── docs/                               # 封面图、界面截图与可选的 Actions 模板
+    ├── preview.png                     # 仓库封面（1200×630）
+    ├── preview.svg                     # 封面源文件
+    ├── screenshot-dashboard.png        # 首页 · 浅色卡片视图
+    ├── screenshot-dark.png             # 首页 · 深色
+    ├── screenshot-list.png             # 首页 · 列表视图
     └── build-theme.yml                 # 复制到 .github/workflows/ 即可手动触发构建
 ```
 
@@ -241,6 +267,7 @@ https://你的Worker域名/?theme_url=https://github.com/famintt/cfsm-theme-auro
 | 自定义 CSS / 自定义 Head `custom_head` | 注入到 `</head>` 之前 |
 | 自定义脚本 `custom_script` | 注入到 `</body>` 之前 |
 | 深色 / 浅色、中文 / 英文 | 决定主题初始配色与界面语言 |
+| 外观默认值 `theme_options` | 后台保存的主题色 / 密度 / 迷你走势 / 视图，作为**首次访问**的访客的默认值；访客自己改过之后以本地为准 |
 
 **数据展示类**（系统配置，影响卡片显示哪些指标）
 
@@ -402,6 +429,14 @@ Aurora 目前**不在商店里**，请按本文手动填写地址接入。
 没有区别，主题不关心域名。只要前台和 `/api/*` 同源（默认部署就是同源），主题就能正常工作。
 </details>
 
+<details>
+<summary><b>11. 外观菜单改了，别的访客会跟着变吗？</b></summary>
+
+分两层：访客自己的选择只存在他自己的浏览器里（`localStorage` 键 `cfsm-theme-ui`），彼此互不影响；
+管理员登录后改动会写进面板的 `theme_options`，**只作为新访客的默认值**，不会覆盖老访客已经选好的外观。
+想恢复默认，清掉该站点的浏览器数据即可。
+</details>
+
 ## 兼容性
 
 - 已在 **CF-Server-Monitor `2.8.7 Beta6`** 验证；
@@ -478,14 +513,18 @@ Copy-Item dist\index.html ..\index.html -Force
 
 ### 常见改动位置
 
-- **配色**：`source/src/styles/main.css` 顶部的 `--accent` / `--bg` / `--surface` 变量；
+- **主题色**：`source/src/styles/main.css` 里 `html[data-accent="aurora|emerald|sakura|amber"]` 两组规则（浅色 / 深色各一套），改 `--accent` 与 `--accent-2` 即可；要加第五套，还要在 `stores/monitor.js` 的 `ACCENTS` 和 `utils/i18n.js` 里补上词条；
+- **基础配色**：同一文件顶部的 `--bg` / `--surface` / `--text` 变量；
+- **密度**：`html[data-density="compact"]` 那组变量，以及 `.node-card` / `.summary-tile` / `.table-shell` 的内边距；
 - **卡片列数**：`Dashboard.vue` 里 `.server-grid` 的 `grid-template-columns`（默认 4 列）；
 - **文案**：`source/src/utils/i18n.js`，中英两份；
 - **首页四块汇总**：`components/SummaryHero.vue`；
+- **外观菜单**：`components/ThemeMenu.vue`（由 `AppHeader.vue` 挂载）；
+- **列表视图**：`components/ServerTable.vue`（由 `Dashboard.vue` 挂载，列随后台开关自动增减）；
 - **详情页图表**：`components/LineChart.vue` 与 `views/ServerDetail.vue`。
 
-> 源码里的 `components/ThemeMenu.vue`（配色 / 密度 / 迷你图开关）和 `components/ServerTable.vue`（列表视图）
-> **目前没有挂载**，属于半成品；它们依赖的 `/api/theme_options` 读写已经在 `stores/monitor.js` 里实现，接上就能用。
+> 访客偏好存在 `localStorage` 的 `cfsm-theme-ui` 键里，结构为 `{ accent, density, sparkline, view }`：
+> 首次访问用后台 `theme_options`，之后的本地选择优先 —— 管理员改默认值不会覆盖访客已经选好的外观。
 
 ### 从零写一个主题
 

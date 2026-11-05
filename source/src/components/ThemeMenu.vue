@@ -73,7 +73,6 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="menu-group">
-          <span class="menu-label">{{ t('theme') }}</span>
           <div class="segmented">
             <button
               v-for="item in themes"

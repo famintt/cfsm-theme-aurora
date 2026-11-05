@@ -128,7 +128,7 @@ const spark = computed(() => {
           <span class="tile-sep">·</span>
           <span>↑ {{ formatSpeed(speed.outbound) }}</span>
         </div>
-        <svg v-if="spark" class="tile-spark" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true">
+        <svg v-if="spark && monitor.sparkline" class="tile-spark" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true">
           <polyline :points="spark.rx" fill="none" stroke="currentColor" stroke-width="1.25" vector-effect="non-scaling-stroke" />
           <polyline :points="spark.tx" fill="none" stroke="currentColor" stroke-width="1.25" vector-effect="non-scaling-stroke" class="spark-muted" />
         </svg>
